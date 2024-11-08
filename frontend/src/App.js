@@ -79,6 +79,7 @@ function App() {
       <button onClick={addTarefa}>Adicionar Tarefa</button>
       
       <h3>Lista de Tarefas</h3>
+      <p>Para que os testes funcionem, é necessário apagar todas as tarefas existentes.</p>
       <ul>
         {tarefas.length === 0 && <h3>Nenhuma tarefa cadastrada</h3>}
         {tarefas.map((tarefa) => (

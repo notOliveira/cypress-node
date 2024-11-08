@@ -1,32 +1,71 @@
 describe('Cadastro de Tarefas', () => {
-  it('Deve adicionar uma nova tarefa', () => {
+  beforeEach(() => {
     cy.visit('http://localhost:3000');
-    // Preencher a descrição e marcar como concluída
+  });
+
+  it('Deve adicionar uma nova tarefa', () => {
     cy.get('input[placeholder="Descrição"]').type('Questionário Cypress');
     cy.get('input[type="checkbox"]').check();
-    // Adicionar a tarefa
     cy.get('button').contains('Adicionar Tarefa').click();
-    // Verificar se a tarefa aparece na lista
-    cy.contains('Estudar Cypress - Concluída').should('be.visible');
-    // Verificar se a tarefa concluída tem a classe 'completed' e o estilo de cor correto
-    cy.contains('Estudar Cypress - Concluída')
-      .should('have.class', 'completed')
-      .and('have.css', 'color', 'rgb(40, 167, 69)'); // Cor verde para tarefa concluída
+
+    // Verifique se a tarefa aparece com a classe correta
+    cy.contains('Questionário Cypress - Concluída')
+      .should('exist')
+      .parent('li')
+      .should('have.class', 'bg-completed');
   });
 
   it('Deve listar tarefas corretamente', () => {
-    cy.visit('http://localhost:3000');
     cy.get('h3').contains('Lista de Tarefas').should('be.visible');
+    cy.contains('Nenhuma tarefa cadastrada').should('be.visible');
   });
 
   it('Deve aplicar estilos corretamente ao adicionar uma tarefa pendente', () => {
-    cy.visit('http://localhost:3000');
-    // Adicionando tarefa pendente
     cy.get('input[placeholder="Descrição"]').type('Tarefa Pendente');
     cy.get('button').contains('Adicionar Tarefa').click();
-    // Verifica se a tarefa pendente possui a classe 'pending' e o estilo de cor correto
+
+    // Verifique se a tarefa está pendente
     cy.contains('Tarefa Pendente - Pendente')
-      .should('have.class', 'pending')
-      .and('have.css', 'color', 'rgb(220, 53, 69)'); // Cor vermelha para tarefa pendente
+      .should('exist')
+      .parent('li')
+      .should('have.class', 'bg-pending');
+  });
+
+  it('Deve alternar o status de conclusão de uma tarefa', () => {
+    cy.get('input[placeholder="Descrição"]').type('Tarefa para Alterar Status');
+    cy.get('button').contains('Adicionar Tarefa').click();
+
+    // Espera a tarefa ser listada
+    cy.contains('Tarefa para Alterar Status - Pendente')
+      .should('exist')
+      .parent('li')
+      .as('tarefaPendente');
+
+    // Muda o status para "Concluída"
+    cy.get('@tarefaPendente')
+      .find('button.change-status-button')
+      .click();
+
+    // Confirma o status atualizado e a classe
+    cy.contains('Tarefa para Alterar Status - Concluída')
+      .should('exist')
+      .parent('li')
+      .should('have.class', 'bg-completed');
+  });
+
+  it('Deve excluir uma tarefa', () => {
+    cy.get('input[placeholder="Descrição"]').type('Tarefa para Excluir');
+    cy.get('button').contains('Adicionar Tarefa').click();
+
+    cy.contains('Tarefa para Excluir - Pendente').should('be.visible');
+
+    // Clica no botão de exclusão
+    cy.contains('Tarefa para Excluir')
+      .parent()
+      .find('button.delete-button')
+      .click();
+
+    // Verifica que a tarefa foi removida
+    cy.contains('Tarefa para Excluir').should('not.exist');
   });
 });
